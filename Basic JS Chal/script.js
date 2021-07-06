@@ -17,3 +17,4 @@ document.getElementById('usernameInput').addEventListener('keyup', function(even
     console.log(username);
 })
 
+
