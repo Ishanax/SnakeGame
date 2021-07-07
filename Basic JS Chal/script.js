@@ -1,66 +1,74 @@
-//References 
-let player1Score = document.getElementById('player1Scoreboard');
-let player2Score = document.getElementById('player2Scoreboard');
-const player1Dice = document.getElementById('player1Dice');
-const player2Dice = document.getElementById('player2Dice');
-const message = document.getElementById('message');
-//Btns 
-const rollButton = document.getElementById('rollBtn');
-const resetButton = document.getElementById('resetBtn');
+const grid = document.querySelector('.grid')
+const startButton = document.getElementById('start')
+const score = document.getElementById('score')
+let squares = []
+let currentSnake = [2,1,0]
+let direction = 1
+let width = 10
+let appleIndex = 0
 
-//Game state
-let score1 = 0;
-let score2 = 0;
-let player1Turn = true;
-
-rollButton.addEventListener('click', function(){
-    const randomNumber = Math.floor(Math.random() *6)+1;
-
-    if (player1Turn){
-        player1Dice.innerHTML = randomNumber;
-        message.innerHTML = 'Player 1 Turn'
-        player1Dice.classList.remove('active')
-        player2Dice.classList.add('active')
-        score1 += randomNumber
-        player1Score.textContent = score1
-
-    }else {
-        player2Dice.innerHTML = randomNumber
-        message.innerHTML = 'Player 2 Turn'
-        player2Dice.classList.remove('active')
-        player1Dice.classList.add('active')
-        score2 += randomNumber
-        player2Score.textContent = score2    
+function createGrid (){
+    
+    for(let i =0; i < width*width; i++){
+        const square = document.createElement('div')
+        square.classList.add('square')
+        grid.appendChild(square)
+        squares.push(square)
     }
-    if(player1Turn){
-        player1Turn = false
-        
-    }else {
-        player1Turn = true  
-    }
+}
+createGrid()
 
-    if (score1 >= 20){
-        message.innerHTML = "Player 1 has won!"
-        rollButton.style.display = 'none'
-        resetButton.style.display = 'block'
-    }else if (score2 >=20){
-        message.innerHTML = "Player 2 has won!"
-        rollButton.style.display = 'none'
-        resetButton.style.display = 'block'
-    } 
-       
-})
- 
-resetButton.addEventListener('click', function(){
-    player1Dice.innerHTML = '-'
-    player2Dice.innerHTML = '-'
-    score1 = 0
-    score2 = 0
-    player1Score.innerHTML = 0
-    player2Score.innerHTML = 0
-    message.innerHTML = "Let's play"
-    rollButton.style.display = 'block'
-    resetButton.style.display = 'none'
-    player2Dice.classList.remove('active')
-    player1Dice.classList.add('active')
-})
+currentSnake.forEach(index => squares[index].classList.add('snake'))
+
+function move() {
+    if (
+        (currentSnake[0] + width >= width*width && direction === width) || //if snake has hit bottom
+        (currentSnake[0] % width === width-1 && direction === 1) || //if snake has hit right wall
+        (currentSnake[0] % width === 0 && direction === -1) || //if snake has hit left wall
+        (currentSnake[0] - width < 0 && direction === -width) || //if snake has hit top
+        squares[currentSnake[0] + direction].classList.contains('snake')
+    )
+    return clearInterval(timerId)
+    
+   //remove last element from our currentSnake array
+   const tail = currentSnake.pop()
+   //remove styling from last element
+   squares[tail].classList.remove('snake')
+   //add square in direction we are heading
+   currentSnake.unshift(currentSnake[0] + direction)
+   //add styling so we can see it
+   squares[currentSnake[0]].classList.add('snake')
+}
+move()
+
+const timerId = setInterval(move, 1000)
+
+function makeApples(){
+    do {
+        appleIndex =  Math.floor(Math.random()* squares.length)
+    } while (squares[appleIndex].classList.contains('snake'))
+        squares[appleIndex].classList.add('apple')
+}
+makeApples()
+
+function control(e){
+    if(e.keyCode === 39){
+        console.log('right')
+        direction = 1
+    }else if(e.keyCode === 38){
+        console.log('up')
+        direction = -width
+    }else if(e.keyCode === 37){
+        console.log('left')
+        direction = -1
+    }else if(e.keyCode === 40){
+        console.log('down')
+        direction = +width
+    }
+}
+//control()
+
+document.addEventListener('keyup', control)
+
+
+
